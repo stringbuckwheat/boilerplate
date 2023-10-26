@@ -41,3 +41,5 @@ setting-react/.idea
 setting-react/node_modules
 setting-react/build
 setting-react/.pnp
+
+src/main/generated
