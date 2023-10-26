@@ -17,6 +17,7 @@ function App() {
             .catch((error) => setLoginMsg(() => "로그인 실패"));
 
         if(res){
+            console.log("res", res.data);
             setLoginMsg(res.data.message);
         }
     }
