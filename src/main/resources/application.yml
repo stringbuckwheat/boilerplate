@@ -1,0 +1,21 @@
+logging:
+  level:
+    com.memil.setting: debug
+
+# DB 설정
+spring:
+  datasource:
+    url: [db url]
+    driver-class-name: [db driver]
+    username: [db username]
+    password: [db password]
+
+# JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: update
+    generate-ddl: false
+    show-sql: true
+    properties:
+      '[hibernate.format_sql]': true
+    open-in-view: false

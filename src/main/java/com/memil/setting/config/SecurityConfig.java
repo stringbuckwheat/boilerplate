@@ -1,4 +1,4 @@
-package com.memil.setting;
+package com.memil.setting.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
