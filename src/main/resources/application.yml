@@ -1,3 +1,5 @@
+secret: [아주 길고 복잡한 문자열을 적으세요]
+
 logging:
   level:
     com.memil.setting: debug
@@ -10,7 +12,7 @@ spring:
     username: [db username]
     password: [db password]
 
-# JPA 설정
+  # JPA 설정
   jpa:
     hibernate:
       ddl-auto: update

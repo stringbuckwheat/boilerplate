@@ -1,5 +1,7 @@
 package com.memil.setting.config;
 
+import com.memil.setting.auth.JwtExceptionFilter;
+import com.memil.setting.auth.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,16 +11,19 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
 
+//MEMIL Spring Security 설정 클래스
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    //MEMIL Spring Security 설정 클래스
+    private final JwtFilter jwtFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -50,7 +55,9 @@ public class SecurityConfig {
                                 .requestMatchers("/login").permitAll() // MEMIL 모든 접속 허용
 
                                 .requestMatchers("/auth/**").authenticated() // MEMIL authenticated(): 인증이 필요한 API 주소를 적어주세요
-                );
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtExceptionFilter, JwtFilter.class);
 
         return httpSecurity.build();
     }
