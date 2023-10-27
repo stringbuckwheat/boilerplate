@@ -1,42 +1,18 @@
-import {useState} from "react";
-import axios from "axios";
+import {Suspense} from "react";
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Login from "./Login";
+import Main from "./Main";
 
 function App() {
-    const [login, setLogin] = useState({username: 'memil', password: 'loveyoumemil'});
-    const [loginMsg, setLoginMsg] = useState("");
-    const onChange = (e) => {
-        const {name, value} = e.target;
-        setLogin({...login, [name]: value});
-    }
-
-    const submit = async (e) => {
-        e.preventDefault();
-
-        // MEMIL process.env.REACT_APP_API => env 파일 정보 읽어오기
-        const res = await axios.post(`${process.env.REACT_APP_API}/login`, login)
-            .catch((error) => setLoginMsg(() => "로그인 실패"));
-
-        if(res){
-            setLoginMsg(res.data.message);
-        }
-    }
-
     return (
-        <>
-            <form onSubmit={(e) => submit(e)}>
-                <div>
-                    <label>username: </label>
-                    <input name={"username"} defaultValue={"memil"} onChange={onChange}/>
-                </div>
-                <div>
-                    <label>password: </label>
-                    <input name={"password"} defaultValue={"loveyoumemil"} onChange={onChange}/>
-                </div>
-                <br/>
-                <button type={"submit"}>로그인</button>
-            </form>
-            <div>{loginMsg}</div>
-        </>
+        <BrowserRouter>
+            <Suspense fallback="..loading">
+                <Routes>
+                    <Route path="/" element={<Login/>}/>
+                    <Route path="/main" element={<Main/>}/>
+                </Routes>
+            </Suspense>
+        </BrowserRouter>
     );
 }
 
