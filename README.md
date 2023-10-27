@@ -2,7 +2,7 @@
 
 # 1. Spring Boot / React 보일러 플레이트🔥
 블로그에서 가장 핫한 포스트가 Spring Boot 3 설정 및 CORS 설정 관련 포스트이기도 하고,     
-토이 프로젝트를 만들 때마다 비슷한 코드를 반복해야 하는 탓에 보일러 플레이트 코드를 작성했어요.     
+토이 프로젝트를 만들 때마다 비슷한 코드를 반복해야 하는 탓에 보일러 플레이트 코드를 작성했어요.
 
 쓰임새에 따라 브랜치로 구분해놓았습니다.     
 스터디원과 공유할 겸 깃허브에 등록합니다 🤟
@@ -28,19 +28,17 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
   * yml DB 연동, JPA 설정
   * QueryDsl QClass 설정(build.gradle)
 * LOGIN
-  * **access token을 사용한 로그인이 가능합니다**
+  * **access token을 사용한 로그인**
+  * 로그인 이후 처리용 Filter 및 예외처리
+  * Request Header에 Access Token을 포함시키는 interceptor
+  * access token 만료/유효하지 않을 시 로그아웃 처리
 
 
-# 2. 사용 방법 - branch DATA
+# 2. 사용 방법 - branch LOGIN
 ### 🌿 체크리스트
-* **yml** 설정하기 - DB, JPA 설정을 완성해주세요
-* JPA ddl 옵션이 update라 **서버를 켜면 테이블**이 만들어져요.
-  * 데이터베이스를 확인해 JPA 설정 성공 여부를 확인하세요
-  * 필요시 다른 모드로 바꾸세요
-* ```src/generated/...``` 경로에서 Qclass가 생성 여부를 확인하세요 
-  * Qclass가 무사히 생성되었다면, QueryDsl 연동 완료입니다
-* gitignore에 QClass 경로를 추가해주세요
-* mock data가 필요하다면, ```/src/main/test```의 UserRepositoryTest의 insertUsers 메소드를 활용하세요
+* yml에 JWT Key를 만들 비밀키를 추가해주세요
+* (필요하다면) AccessToken의 EXPIRED_AFTER 필드를 수정하여 토큰 유효 시간을 조정하세요.
+* JwtExceptionFilter의 에러코드, 메시지를 커스터마이징하세요
 
 ### 🌿 프로젝트 구조
 
@@ -50,71 +48,82 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
 ├── setting-react // ⭐️ React 프로젝트
 │   ├── public
 │   ├── src
-│   │   ├── App.js // ⭐️ 로그인 form
+│   │   ├── App.js // ⭐️ 라우팅 추가(react-router-dom)
+│   │   ├── Login.jsx // ⭐️ 로그인 페이지
+│   │   ├── Main.jsx // ⭐️ 로그인 후 넘어갈 메인 페이지
 │   │   ├── index.css
 │   │   ├── index.js
+│   │   └── interceptors.js // ⭐️ axios 객체 설정 및 interceptor
 │   ├── package.json // ⭐️ 프록시 서버 설정
 │   └── .env // ⭐️ 서버 주소를 저장해뒀습니다
 └── src
     ├── main
     │   ├── java
     │   │   └── com/memil/setting
-    │   │       └── SettingApplication.java
-    │   │           ├── config
-    │   │           │   ├── QueryDslConfig.java // ⭐️ QueryDsl 설정
-    │   │           │   └── SecurityConfig.java // ⭐️ Spring Security 설정
-    │   │           ├── controller
-    │   │           │   └── LoginController.java // ⭐️ 로그인 컨트롤러
-    │   │           ├── entity
-    │   │           │   └── User.java // ⭐️ User 엔티티
-    │   │           └── repository
-    │   │              ├── UserQueryRepository.java // ⭐️ QueryDsl 리파지토리(인터페이스)
-    │   │              ├── UserQueryRepositoryImpl.java // ⭐️ QueryDsl 리파지토리(구현체)
-    │   │              └── UserRepository.java // ⭐️ JPA 리파지토리(쿼리 메소드)
+    │   │       ├── SettingApplication.java
+    │   │       ├── AccessToken.java // ⭐️ AccessToken 클래스
+    │   │       ├── auth
+    │   │       │   ├── JwtExceptionFilter.java // ⭐️ JWTFilter 예외처리
+    │   │       │   ├── JwtFilter.java // ⭐️ Access Token 유효성 검사
+    │   │       │   └── SecretKey.java // ⭐️ JWT Signature Key 생성 객체
+    │   │       ├── config
+    │   │       │   ├── QueryDslConfig.java // ⭐️ QueryDsl 설정
+    │   │       │   └── SecurityConfig.java // ⭐️ Spring Security 설정
+    │   │       ├── controller
+    │   │       │   └── LoginController.java // ⭐️ 테스트용 컨트롤러
+    │   │       ├── entity
+    │   │       │   └── User.java // ⭐️ User 엔티티
+    │   │       └── repository
+    │   │           ├── UserQueryRepository.java // ⭐️ QueryDsl 리파지토리(인터페이스)
+    │   │           ├── UserQueryRepositoryImpl.java // ⭐️ QueryDsl 리파지토리(구현체)
+    │   │           └── UserRepository.java // ⭐️ JPA 리파지토리(쿼리 메소드)
     │   └── resources
     │       └── application.yml // ⭐️ DB, JPA, Spring Boot 설정 정보
     └── test
-        └── java
-            └── com
-                └── memil
-                    └── setting
-                        └── UserRepositoryTest.java // ⭐️ User Mock data 메소드, 로그인 테스트 메소드
+        └── java/com/memil
+            └── setting
+                └── UserRepositoryTest.java // ⭐️ User Mock data 메소드, 로그인 테스트 메소드
     
 ```
-* **React**
-  * setting-react
-    * 이 프로젝트는 spring boot 프로젝트 안에 react 프로젝트가 들어있는 구조입니다
-    * .env
-      * 통신할 서버의 주소를 기록합니다.
-      * Spring Boot가 기본 포트를 사용하고 있지 않을 시, 이곳을 수정하세요.
-    * package.json
-      * 가장 하단 프록시 설정이 있습니다.
-      * Spring Boot가 기본 포트를 사용하고 있지 않을 시, 이곳을 수정하세요.
-    * App.js
-      * 간단한 로그인 폼이 있어요
-      * 테스트 성공 데이터(username, password)가 기본값으로 설정되어 있습니다.
 
-    
-     
+### 🌿 파일 설명
+(개발 순서와 동일합니다)
 
-* **Spring Boot**
+* Spring Boot
   * build.gradle
-    * JPA, QueryDsl 의존성을 확인하세요
-    * 엔티티 변경 시 새 Qclass를 반영할 수 있도록 clean을 재정의합니다
-  * QueryDslConfig.java
-    * JpaQueryFactory를 빈으로 등록합니다.
-  * SecurityConfig.java
-    * CORS와 Security FilterChiain 설정 파일이에요
-    * React가 다른 포트를 사용하고 있거나, 기타 설정이 더 필요하다면 이곳에서 설정하세요
+    * JWT 관련 dependency 추가
+  * SecretKey.java
+    * AccessToken 생성 시 사용할 Secret Key를 만드는 객체입니다
+    * AccessToken 클래스, JwtFilter에서 공통적으로 사용해요
+  * AccessToken.java
+    * 실제 엑세스 토큰 객체
+    * encoding, decoding 메소드를 포함합니다.
   * LoginController.java
-    * JPA 쿼리메소드 / QueryDsl 메소드를 사용하여 로그인합니다
-  * User.java
-    * 엔티티
-    * username(PK), password 필드 구성이에요
-  * application.yml
-    * DB와 JPA 설정 정보를 기입하세요
-  * UserTrpositoryTest.java
-    * DB에 입력할 mock data 메소드, 로그인 테스트 메소드가 간단히 구현되어 있습니다.
+    * (CORS, DATA 브랜치와 달리) 사용자 정보를 Spring Security에 저장하고,
+    * AccessToken을 발급합니다.
+    * 테스트 용도로 인증이 필요한 메소드를 구현해놓았어요. ("/auth/test")
+  * JwtFilter.java
+    * header로 넘어온 access token의 유효성을 검사합니다
+  * JwtExceptionFilter.java
+    * JwtFilter의 예외처리를 담당합니다
+  * SecurityConfig.java
+    * JwtFilter, JwtExceptionFilter를 적절한 순서에 추가해요
 
-### 🌿 Repository 구성
-![repository](https://github.com/stringbuckwheat/boilerplate/assets/104717358/bb0847fe-1f7d-4896-ae68-5d897c69a881)
+
+* React
+  * package.json
+    * react-router-dom 의존성 추가
+  * interceptor.js
+    * Request Interceptor
+      * Header에 access token 포함시키는 용도
+    * Response Interceptor
+      * Custom Error Code를 사용해 로그아웃
+  * App.js
+    * 라우팅 추가
+    * 기본 주소에서 로그인 시 메인 페이지로 넘어갑니다.
+  * Login.jsx
+    * 로그인 페이지
+    * access token을 받아 저장하고, 메인 페이지로 이동시켜요
+  * Main.jsx
+    * 컴포넌트 마운트 시점에 인증이 필요한 GET 요청이 하나 갑니다.
+    * token이 유효하지 않을 시 로그아웃 처리됩니다.
