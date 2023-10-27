@@ -11,6 +11,13 @@ cf)
 README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.   
 전체 검색으로 MEMIL을 검색하면 쉽게 찾아볼 수 있어요!
 
+## 사용 기술
+* Spring Boot 3.1
+  * JPA/Hibernate
+  * QueryDsl
+* React 18
+  * Axios
+
 ## 브랜치 요약
 * CORS
   * **Spring Boot, React 간 통신 이슈만 해결해요**
