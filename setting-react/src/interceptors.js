@@ -26,15 +26,14 @@ authAxios.interceptors.request.use(
 authAxios.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.log("response interceptor error", error);
-        console.log("error.response.data", error.response.data);
-
         // 로그아웃 시켜야 할 에러코드
         if(error.response.data.errorCode === "B001"){
             alert(error.response.data.msg);
             localStorage.clear();
             window.location.replace('/');
         }
+
+        return Promise.reject(error.response.data);
     }
 )
 

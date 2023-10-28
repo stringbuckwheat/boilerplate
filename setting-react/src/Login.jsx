@@ -24,7 +24,7 @@ const Login = () => {
             // 메인 페이지로 이동
             navigate("/main", {replace: true});
         } catch (e) {
-            setLoginMsg(() => "로그인 실패");
+            setLoginMsg(() => e.response.data.msg);
         }
     }
 
@@ -46,6 +46,9 @@ const Login = () => {
             <br/>
             <a href={`${process.env.REACT_APP_API}/oauth2/authorization/google`}>
                 <button>구글 로그인</button>
+            </a>
+            <a href={`${process.env.REACT_APP_API}/oauth2/authorization/kakao`}>
+                <button>카카오 로그인</button>
             </a>
         </>
     )
