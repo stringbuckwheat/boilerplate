@@ -1,19 +1,22 @@
 package com.memil.setting.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "user")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @ToString(of = {"username"})
 @Getter
+@Builder
 public class User {
     @Id
-    private String username;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
+    private String username;
     private String password;
+    private String name;
+    private String provider; // local, google, kakao...
 }

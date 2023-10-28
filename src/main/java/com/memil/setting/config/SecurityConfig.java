@@ -2,6 +2,8 @@ package com.memil.setting.config;
 
 import com.memil.setting.auth.JwtExceptionFilter;
 import com.memil.setting.auth.JwtFilter;
+import com.memil.setting.oauth2.OAuth2MemberService;
+import com.memil.setting.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +26,9 @@ import java.util.Collections;
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final OAuth2SuccessHandler successHandler;
+    private final OAuth2MemberService oAuth2MemberService;
+
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -55,6 +60,11 @@ public class SecurityConfig {
                                 .requestMatchers("/login").permitAll() // MEMIL 모든 접속 허용
 
                                 .requestMatchers("/auth/**").authenticated() // MEMIL authenticated(): 인증이 필요한 API 주소를 적어주세요
+                )
+                .oauth2Login(oauth2Configurer -> oauth2Configurer
+                        // .loginPage("/")
+                        .successHandler(successHandler)
+                        .userInfoEndpoint(configurer -> configurer.userService(oAuth2MemberService))
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtExceptionFilter, JwtFilter.class);

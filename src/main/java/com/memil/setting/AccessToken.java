@@ -1,6 +1,7 @@
 package com.memil.setting;
 
 import com.memil.setting.entity.User;
+import com.memil.setting.oauth2.UserPrincipal;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -31,7 +32,8 @@ public class AccessToken {
     private LocalDateTime expiredAt;
 
     // AccessToken 생성자 (발급 시)
-    public AccessToken(User user, Key key) {
+    // User가 아니라 UserPrincipal로 만들도록 수정
+    public AccessToken(UserPrincipal user, Key key) {
         LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(EXPIRED_AFTER);
         Date expiredDate = Date.from(expiredAt.atZone(ZoneId.systemDefault()).toInstant());
 

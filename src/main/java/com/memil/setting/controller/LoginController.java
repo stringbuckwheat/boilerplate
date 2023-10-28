@@ -3,6 +3,7 @@ package com.memil.setting.controller;
 import com.memil.setting.AccessToken;
 import com.memil.setting.auth.SecretKey;
 import com.memil.setting.entity.User;
+import com.memil.setting.oauth2.UserPrincipal;
 import com.memil.setting.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +40,14 @@ public class LoginController {
         }
 
         // Security Context 저장
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(request.get("username"), request.get("password"), Collections.singleton(new SimpleGrantedAuthority("USER")));
+        UserPrincipal userPrincipal = new UserPrincipal(memil.getUserId(), memil.getName());
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userPrincipal, request.get("password"), Collections.singleton(new SimpleGrantedAuthority("USER")));
         SecurityContextHolder.getContext().setAuthentication(token);
 
         // response 만들기
         Map<String, String> response = new HashMap<>();
         response.put("username", memil.getUsername());
-        response.put("accessToken", new AccessToken(memil, secretKey.getKey()).getToken()); // AccessToken 추가
+        response.put("accessToken", new AccessToken(userPrincipal, secretKey.getKey()).getToken()); // AccessToken 추가
         response.put("message", "로그인 성공");
 
         return response;
