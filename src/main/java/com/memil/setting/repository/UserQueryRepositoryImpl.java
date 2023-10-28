@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 import static com.memil.setting.entity.QUser.user;
 
 // MEMIL static import
@@ -18,12 +20,12 @@ public class UserQueryRepositoryImpl implements UserQueryRepository{
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public User findByUsername(String username) {
-        log.debug("QueryDsl findByUsername");
-
-        return queryFactory
+    public Optional<User> findByUsername(String username) {
+        User result = queryFactory
                 .selectFrom(user) // MEMIL static import
                 .where(user.username.eq(username))
                 .fetchOne();
+
+        return Optional.ofNullable(result);
     }
 }

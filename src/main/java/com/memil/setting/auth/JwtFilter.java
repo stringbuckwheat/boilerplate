@@ -1,18 +1,21 @@
 package com.memil.setting.auth;
 
 import com.memil.setting.AccessToken;
+import com.memil.setting.oauth2.UserPrincipal;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,12 +25,13 @@ import java.util.Collections;
 
 // 로그인 이후 access token 검증하는 필터
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
     private final SecretKey secretKey;
+    private final UserDetailsService userDetailsService;
 
     private String resolveToken(HttpServletRequest request) {
         // Request header에서 토큰 가져오기
@@ -56,16 +60,17 @@ public class JwtFilter extends OncePerRequestFilter {
             Claims claims = accessToken.getData();
 
             // 유저 객체 생성
-            // MEMIL 간단한 코드라 사용자 정보가 username밖에 없습니다.
-            // 추가적인 사용자 정보가 필요하다면 UserPrincipal 객체를 커스터마이징하여
-            // 첫번째 인자로 넘겨주면 됩니다
+            // MEMIL 커스텀한 유저 클래스입니다
+            UserPrincipal user = (UserPrincipal) userDetailsService.loadUserByUsername(claims.getSubject());
+
+            // MEMIL principal로 위 UserPrincipal 객체를 넘깁니다.
             Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    claims.get("aud"),
+                    user,
                     null,
                     Collections.singleton(new SimpleGrantedAuthority("USER")));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            log.debug("username: {}", claims.get("aud"), " 인증 성공!");
+            log.debug("user pk: {} 인증 성공!", claims.get("aud"));
         }
 
         filterChain.doFilter(request, response);

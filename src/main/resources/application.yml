@@ -21,3 +21,26 @@ spring:
     properties:
       '[hibernate.format_sql]': true
     open-in-view: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: [구글 client id]
+            client-secret: [구글 client secret]
+            scope: profile, email
+          kakao:
+            client-id: [구글 client id]
+            client-secret: [구글 client secret]
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            authorization-grant-type: authorization_code
+            scope: profile_nickname,account_email
+            client-name: kakao
+            client-authentication-method: client_secret_post # Spring Boot 3.X에서는 POST면 오류
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id

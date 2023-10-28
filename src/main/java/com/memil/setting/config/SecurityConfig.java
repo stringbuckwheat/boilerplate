@@ -62,7 +62,6 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/**").authenticated() // MEMIL authenticated(): 인증이 필요한 API 주소를 적어주세요
                 )
                 .oauth2Login(oauth2Configurer -> oauth2Configurer
-                        // .loginPage("/")
                         .successHandler(successHandler)
                         .userInfoEndpoint(configurer -> configurer.userService(oAuth2MemberService))
                 )

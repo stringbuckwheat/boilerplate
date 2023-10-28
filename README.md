@@ -32,13 +32,22 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
   * 로그인 이후 처리용 Filter 및 예외처리
   * Request Header에 Access Token을 포함시키는 interceptor
   * access token 만료/유효하지 않을 시 로그아웃 처리
+* OAUTH2
+  * 구글, 카카오 소셜 로그인
+  * 예외처리
+  * UserDetailService, UserDetails 커스터마이징
 
 
-# 2. 사용 방법 - branch LOGIN
+# 2. 사용 방법 - branch OAUTH2
 ### 🌿 체크리스트
-* yml에 JWT Key를 만들 비밀키를 추가해주세요
-* (필요하다면) AccessToken의 EXPIRED_AFTER 필드를 수정하여 토큰 유효 시간을 조정하세요.
-* JwtExceptionFilter의 에러코드, 메시지를 커스터마이징하세요
+* 소셜 로그인 API를 세팅하세요
+  * Redirect URI ```http://localhost:[spring port]/oauth2/code/kakao``` 기준으로 작성된 코드예요
+* yml에 소셜 로그인 관련 정보를 기입하세요
+  * 구글에 비해 카카오는 기입할 정보가 많습니다.
+  * ⭐️ 카카오의 client-authentication-method는 ```POST```가 아니라, ***client_secret_post***로 작성해야합니다.
+    * 오류나요!!
+* User 엔티티를 수정했습니다. 실제 DB의 스키마 변경을 확인해주세요!
+
 
 ### 🌿 프로젝트 구조
 
@@ -49,6 +58,7 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
 │   ├── public
 │   ├── src
 │   │   ├── App.js // ⭐️ 라우팅 추가(react-router-dom)
+│   │   ├── GetToken.jsx // ⭐️ url 파라미터로 전달된 access token 저장
 │   │   ├── Login.jsx // ⭐️ 로그인 페이지
 │   │   ├── Main.jsx // ⭐️ 로그인 후 넘어갈 메인 페이지
 │   │   ├── index.css
@@ -63,16 +73,23 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
     │   │       ├── SettingApplication.java
     │   │       ├── AccessToken.java // ⭐️ AccessToken 클래스
     │   │       ├── auth
-    │   │       │   ├── JwtExceptionFilter.java // ⭐️ JWTFilter 예외처리
+    │   │       │   ├── JwtExceptionFilter.java // ⭐️ JWT Filter 예외처리
     │   │       │   ├── JwtFilter.java // ⭐️ Access Token 유효성 검사
     │   │       │   └── SecretKey.java // ⭐️ JWT Signature Key 생성 객체
     │   │       ├── config
     │   │       │   ├── QueryDslConfig.java // ⭐️ QueryDsl 설정
     │   │       │   └── SecurityConfig.java // ⭐️ Spring Security 설정
     │   │       ├── controller
+    │   │       │   ├── GlobalExceptionHandler.java // ⭐️ 예외처리
     │   │       │   └── LoginController.java // ⭐️ 테스트용 컨트롤러
     │   │       ├── entity
     │   │       │   └── User.java // ⭐️ User 엔티티
+    │   │       ├── oauth2
+    │   │       │   ├── OAuth2Attribute.java // ⭐️ OAuth2 로그인 성공 정보를 담을 클래스
+    │   │       │   ├── OAuth2MemberService.java // ⭐️ OAuth2 사용자 정보를 가져옵니다
+    │   │       │   ├── OAuth2SuccessHandler.java // ⭐️ 성공 후 로직(access token과 함께 리다이렉트)
+    │   │       │   ├── UserDetailsServiceImpl.java // ⭐️ 사용자 정보 로드
+    │   │       │   └── UserPrincipal.java // ⭐️ OAuth2User와 UserDetails 커스터마이징
     │   │       └── repository
     │   │           ├── UserQueryRepository.java // ⭐️ QueryDsl 리파지토리(인터페이스)
     │   │           ├── UserQueryRepositoryImpl.java // ⭐️ QueryDsl 리파지토리(구현체)
@@ -82,7 +99,7 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
     └── test
         └── java/com/memil
             └── setting
-                └── UserRepositoryTest.java // ⭐️ User Mock data 메소드, 로그인 테스트 메소드
+                └── SettingApplicationTests.java // ⭐️ 기본 로그인용 유저 insert 메소드가 있어요
     
 ```
 
@@ -91,39 +108,39 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
 
 * Spring Boot
   * build.gradle
-    * JWT 관련 dependency 추가
-  * SecretKey.java
-    * AccessToken 생성 시 사용할 Secret Key를 만드는 객체입니다
-    * AccessToken 클래스, JwtFilter에서 공통적으로 사용해요
-  * AccessToken.java
-    * 실제 엑세스 토큰 객체
-    * encoding, decoding 메소드를 포함합니다.
-  * LoginController.java
-    * (CORS, DATA 브랜치와 달리) 사용자 정보를 Spring Security에 저장하고,
-    * AccessToken을 발급합니다.
-    * 테스트 용도로 인증이 필요한 메소드를 구현해놓았어요. ("/auth/test")
-  * JwtFilter.java
-    * header로 넘어온 access token의 유효성을 검사합니다
-  * JwtExceptionFilter.java
-    * JwtFilter의 예외처리를 담당합니다
+    * OAuth2 dependency
+  * application.yml
+    * 소셜 로그인 관련 정보를 기입하세요
+  * User.java
+    * 엔티티를 수정했어요
+    * 우리는 더이상 username을 PK로 쓸 수 없습니다. OAuth2 유저의 정보 중 unique한 값이 없으니까요
+    * 저는 userId(auto_increment)로 해결했습니다. 다르게 구현하실 분들은 수정하세요!
+  * OAuth2Attribute.java
+    * OAuth2 로그인 성공 정보를 바탕으로 User 엔티티를 생성, 저장합니다.
+  * UserPrincipal.java
+    * OAuth2User, UserDetails를 implements한 클래스예요.
+    * 이후 @AuthenticationPrincipal에서 기본/소셜 로그인 유저 공통으로 사용하기 위해 만들었습니다.
+  * OAuth2MemberService.java
+    * OAuth2 로그인 성공 정보를 바탕으로 User 엔티티를 생성, 저장합니다.
+  * OAuth2SuccessHandler.java
+    * UserPrincipal 객체의 정보를 바탕으로 Access Token을 생성한 뒤, redirect 시켜줍니다.
   * SecurityConfig.java
-    * JwtFilter, JwtExceptionFilter를 적절한 순서에 추가해요
-
+    * OAuth2 관련 설정을 추가해줍니다.
+    * Spring Boot 2.X 버전과 문법이 다르니 참고하세요!
+  * GlobalExceptionHandler.java
+    * 기본 로그인 시 예외처리를 간단히 구현했어요
+  * LoginController.java
+    * 로그인 후 보일 메인 페이지에서 로그인한 사용자 정보를 리턴하도록 수정했습니다.
+     
 
 * React
-  * package.json
-    * react-router-dom 의존성 추가
-  * interceptor.js
-    * Request Interceptor
-      * Header에 access token 포함시키는 용도
-    * Response Interceptor
-      * Custom Error Code를 사용해 로그아웃
-  * App.js
-    * 라우팅 추가
-    * 기본 주소에서 로그인 시 메인 페이지로 넘어갑니다.
   * Login.jsx
-    * 로그인 페이지
-    * access token을 받아 저장하고, 메인 페이지로 이동시켜요
+    * 소셜 로그인 버튼을 추가했어요.
+    * 못생겼습니다
+    * ```localhost:[spring boot 포트]```로 이동하도록 구현하세요
+  * GetToken.jsx
+    * useParams()를 사용해 우리가 만든 access token을 추출, 저장합니다.
+  * App.js
+    * GetToken 컴포넌트 라우팅 코드를 추가했어요
   * Main.jsx
-    * 컴포넌트 마운트 시점에 인증이 필요한 GET 요청이 하나 갑니다.
-    * token이 유효하지 않을 시 로그아웃 처리됩니다.
+    * 로그인 후 (인증이 필요한 API 요청으로) 간단히 로그인한 사용자 정보를 받아옵니다.

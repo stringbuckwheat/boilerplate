@@ -19,6 +19,7 @@ import java.util.Map;
 
 // MEMIL 인증 관련 Exception 처리를 위한 필터입니다
 // 필터를 두 개 만들기 싫다면, JwtFilter의 doFilterInternal 코드를 try-catch로 감아줘도 됩니다.
+
 @Component
 @Slf4j
 public class JwtExceptionFilter extends OncePerRequestFilter {
@@ -27,7 +28,8 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            filterChain.doFilter(request, response); // go to 'JwtAuthenticationFilter'
+            // go to 'JwtAuthenticationFilter'
+            filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
             setErrorResponse(response, "ACCESS_TOKEN_EXPIRED");
         } catch (MalformedJwtException e) {
@@ -43,7 +45,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         response.setContentType("application/json; charset=UTF-8");
 
         Map<String, String> map = new HashMap<>();
-        map.put("errorCode", "B001"); // 프론트에서 로그아웃 유도로 사용할 코드입니다.
+        map.put("errorCode", "B001"); // MEMIL 프론트에서 로그아웃 유도로 사용할 코드입니다. 이왕이면 ENUM으로 관리하세요!
         map.put("msg", msg);
 
         response.getWriter().write(objectMapper.writeValueAsString(map));

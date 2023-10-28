@@ -13,32 +13,24 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.*;
 
+// MEMIL Authenticaion용 객체
+// 기본 로그인, 소셜 로그인 모두 같은 객체를 쓰고 싶어 커스터마이징했습니다
+// 필요에 따라 필드를 수정하세요
 @AllArgsConstructor
 @Builder
-@ToString
+@ToString(of={"userId", "name"})
 @Getter
 public class UserPrincipal implements UserDetails, OAuth2User {
-    private Long userId;
+    private Long userId; // PK
     private String name;
     private Map<String, Object> oauth2UserAttributes;
 
-    public UserPrincipal(Long id, String name) {
-        this.userId = id;
-        this.name = name;
-    }
-
-    public UserPrincipal(String id) {
-        this.userId = Long.parseLong(id);
-    }
-
-    /* OAuth2 로그인 사용 */
     public static UserPrincipal create(User user, Map<String, Object> oauth2UserAttributes) {
-        return new UserPrincipal(user.getUserId(), user.getName(), oauth2UserAttributes);
+        return new UserPrincipal(user.getUserId(), user.getUsername(), oauth2UserAttributes);
     }
 
-    /* 일반 로그인 사용 */
     public static UserPrincipal create(User user) {
-        return new UserPrincipal(user.getUserId(), user.getName(), new HashMap<>());
+        return new UserPrincipal(user.getUserId(), user.getUsername(), new HashMap<>());
     }
 
     @Override
@@ -56,8 +48,7 @@ public class UserPrincipal implements UserDetails, OAuth2User {
 
     @Override
     public String getUsername() {
-        // username이 아니라 PK 값인 id를 넘겨준다
-        // email은 중복 가능
+        // MEMIL username이 아니라 PK 값인 id를 넘겨 unique한 상태를 유지합니다
         return String.valueOf(this.userId);
     }
 

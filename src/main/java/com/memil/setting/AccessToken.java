@@ -41,7 +41,7 @@ public class AccessToken {
         Map<String, String> claims = new HashMap<>();
 
         claims.put("iss", "memil"); // 발행인
-        claims.put("aud", user.getUsername()); // 토큰 대상자
+        claims.put("aud", user.getUsername()); // 토큰 대상자(User PK)
         claims.put("exp", LocalDateTime.now().toString()); // 발행 시간
 
         this.key = key;
