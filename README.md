@@ -33,9 +33,9 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
   * Request Header에 Access Token을 포함시키는 interceptor
   * access token 만료/유효하지 않을 시 로그아웃 처리
 * OAUTH2
-  * 구글, 카카오 소셜 로그인
+  * **구글, 카카오 소셜 로그인**
   * 예외처리
-  * UserDetailService, UserDetails 커스터마이징
+  * UserDetailService, UserDetails/OAuth2User 커스터마이징
 
 
 # 2. 사용 방법 - branch OAUTH2
@@ -137,7 +137,7 @@ README에 적지 못한 설명은 코드 내 주석에 적어놓았어요.
   * Login.jsx
     * 소셜 로그인 버튼을 추가했어요.
     * 못생겼습니다
-    * ```localhost:[spring boot 포트]```로 이동하도록 구현하세요
+    * ```localhost:[spring boot 포트]/oauth2/authorization/[서비스이름]```으로 이동하도록 구현하세요
   * GetToken.jsx
     * useParams()를 사용해 우리가 만든 access token을 추출, 저장합니다.
   * App.js
