@@ -14,7 +14,7 @@ const Login = () => {
     const submit = async (e) => {
         e.preventDefault();
 
-        try{
+        try {
             const res = await axios.post(`${process.env.REACT_APP_API}/login`, login);
 
             console.log("res", res.data);
@@ -23,7 +23,7 @@ const Login = () => {
 
             // 메인 페이지로 이동
             navigate("/main", {replace: true});
-        } catch (e){
+        } catch (e) {
             setLoginMsg(() => "로그인 실패");
         }
     }
@@ -43,6 +43,10 @@ const Login = () => {
                 <button type={"submit"}>로그인</button>
             </form>
             <div>{loginMsg}</div>
+            <br/>
+            <a href={`${process.env.REACT_APP_API}/oauth2/authorization/google`}>
+                <button>구글 로그인</button>
+            </a>
         </>
     )
 }
